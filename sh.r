@@ -45,7 +45,7 @@ sh_data <- read.csv("SH.csv", colClasses = "character")
 
 
 ## add the new data to the history data
-if (!(data_date %in% sh_data[,1])) 
+if (!(data_date_new %in% sh_data[,1])) 
   sh_data[nrow(sh_data) + 1,] <- c(data_date_new, 
                                    RZMRE, RZYE, RQMCL, RQYL, RQYE, RZRQYE)
 

@@ -1,5 +1,5 @@
 ## load the package "rvest"
-library(rvest)
+library(RSelenium)
 
 ## set the working directory
 setwd("/root/R_scripts")
@@ -7,22 +7,39 @@ setwd("/root/R_scripts")
 ## the url of SHENZHEN STOCK EXCHANGE
 url <- "http://www.szse.cn/main/disclosure/rzrqxx/rzrqjy/"
 
+
+## create a phantom server and connect to it
+pJS <- phantom()
+Sys.sleep(5)   ## give the binary a moment
+remDr <- remoteDriver(browserName = 'phantomjs')
+remDr$open()
+
 ## get the web content
-web <- read_html(url, encoding = "gb2312")
+remDr$navigate(url)
+Sys.sleep(10) ## give the browser a moment
 
 ## get the nodes of the data
-data_nodes <- html_nodes(web, "tr td") %>% html_nodes("[class=cls-data-td]")
+webElems <- remDr$findElements(using = 'css selector', value = "table#REPORTID_tab1.cls-data-table-common.cls-data-table tbody tr td")
+Sys.sleep(10) ## give the browser a moment
 
 ## get the data
-RZMRE <- html_text(data_nodes[1])  ## ÈÚ×ÊÂòÈë¶î
-RZYE <- html_text(data_nodes[2])  ## ÈÚ×ÊÓà¶î
-RQMCL <- html_text(data_nodes[3])  ## ÈÚÈ¯ÂòÈëÁ¿
-RQYL <- html_text(data_nodes[4])  ## ÈÚÈ¯ÓàÁ¿
-RQYE <- html_text(data_nodes[5])  ## ÈÚÈ¯Óà¶î
-RZRQYE <- html_text(data_nodes[6])  ## ÈÚ×ÊÈÚÈ¯Óà¶î
+RZMRE <- webElems[[1]]$getElementText()  ## ÈÚ×ÊÂòÈë¶î
+RZYE <- webElems[[2]]$getElementText()  ## ÈÚ×ÊÓà¶î
+RQMCL <- webElems[[3]]$getElementText()  ## ÈÚÈ¯ÂòÈëÁ¿
+RQYL <- webElems[[4]]$getElementText()  ## ÈÚÈ¯ÓàÁ¿
+RQYE <- webElems[[5]]$getElementText()  ## ÈÚÈ¯Óà¶î
+RZRQYE <- webElems[[6]]$getElementText()  ## ÈÚ×ÊÈÚÈ¯Óà¶î
+
 
 ## get the date of the data
-data_date <- html_text(html_nodes(web, "tr span") %>% html_nodes("[class=cls-subtitle]"))
+webElems <- remDr$findElements(using = 'css selector', value = "tr td span.cls-subtitle")
+data_date <- webElems[[1]]$getElementText()
+
+
+## close the connection and stop the phantom server
+remDr$close()
+pJS$stop()                                                                                                                                           
+
 
 ## read the history data from file
 sz_data <- read.csv("SZ.csv", colClasses = "character")
